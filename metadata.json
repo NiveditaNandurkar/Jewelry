@@ -1,0 +1,6 @@
+{
+  "name": "LUNA Boutique — Luxury Fine Jewelry",
+  "description": "Discover timeless, effortlessly elegant fine jewelry. Necklaces, earrings, rings, and bracelets crafted in 18k gold, rose gold, and sterling silver.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
