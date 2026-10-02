@@ -26,6 +26,8 @@ import { ContactPage } from './pages/ContactPage.tsx';
 import { AccountOrdersPage } from './pages/AccountOrdersPage.tsx';
 import { AdminDashboard } from './pages/AdminDashboard.tsx';
 
+import { apiService } from './services/api.ts';
+
 function MainApp() {
   const [currentTab, setCurrentTab] = useState<string>('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -36,14 +38,11 @@ function MainApp() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
 
-  // Fetch products from backend
+  // Fetch products from backend or static fallback
   const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/products');
-      if (res.ok) {
-        const data = await res.json();
-        setProducts(data);
-      }
+      const data = await apiService.getProducts();
+      setProducts(data);
     } catch (err) {
       console.error('Failed to load products', err);
     } finally {

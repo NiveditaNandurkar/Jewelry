@@ -48,20 +48,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
-      if (!res.ok) {
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data.user);
+        setToken(data.token);
+        localStorage.setItem('luna_user', JSON.stringify(data.user));
+        localStorage.setItem('luna_token', data.token);
+        setIsAuthModalOpen(false);
+        return { success: true };
+      }
+      if (res.status !== 404) {
+        const data = await res.json();
         return { success: false, error: data.error || 'Login failed' };
       }
+    } catch {
+      // Fall through to static fallback below
+    }
 
-      setUser(data.user);
-      setToken(data.token);
-      localStorage.setItem('luna_user', JSON.stringify(data.user));
-      localStorage.setItem('luna_token', data.token);
+    // Static fallback for GitHub Pages (no Express server available)
+    const normalized = email.toLowerCase().trim();
+    if (normalized === 'admin@lunaboutique.com' && password === 'admin123') {
+      const adminUser: User = {
+        id: 'usr-admin-1',
+        name: 'Aditi Sharma',
+        email: 'admin@lunaboutique.com',
+        role: 'admin',
+        phone: '+91 98200 45890',
+        createdAt: '2026-09-01T00:00:00Z',
+      };
+      setUser(adminUser);
+      setToken('tok-admin-static');
+      localStorage.setItem('luna_user', JSON.stringify(adminUser));
+      localStorage.setItem('luna_token', 'tok-admin-static');
       setIsAuthModalOpen(false);
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message || 'Network error' };
     }
+
+    if (normalized === 'customer@example.com' && password === 'password123') {
+      const custUser: User = {
+        id: 'usr-cust-1',
+        name: 'Priyanka Kapoor',
+        email: 'customer@example.com',
+        role: 'customer',
+        phone: '+91 98765 12340',
+        createdAt: '2026-09-10T00:00:00Z',
+      };
+      setUser(custUser);
+      setToken('tok-cust-static');
+      localStorage.setItem('luna_user', JSON.stringify(custUser));
+      localStorage.setItem('luna_token', 'tok-cust-static');
+      setIsAuthModalOpen(false);
+      return { success: true };
+    }
+
+    return { success: false, error: 'Invalid email or password.' };
   };
 
   const register = async (email: string, password: string, name: string, phone?: string) => {

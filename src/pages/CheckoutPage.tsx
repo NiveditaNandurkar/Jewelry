@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useToast } from '../context/ToastContext.tsx';
 import { Lock, ShieldCheck, Truck, CreditCard, Banknote, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { apiService } from '../services/api.ts';
 
 interface CheckoutPageProps {
   onOrderSuccess: (order: Order) => void;
@@ -108,24 +109,18 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onOrderSuccess, onNa
     };
 
     try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const result = await apiService.createOrder(payload);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setErrorMsg(data.error || 'Failed to place order. Please review your cart.');
+      if (!result.success || !result.order) {
+        setErrorMsg(result.error || 'Failed to place order. Please review your cart.');
         setSubmitting(false);
-        showToast(data.error || 'Checkout failed', 'error');
+        showToast(result.error || 'Checkout failed', 'error');
         return;
       }
 
       clearCart();
-      showToast(`Order #${data.orderNumber} successfully confirmed!`, 'success');
-      onOrderSuccess(data);
+      showToast(`Order #${result.order.orderNumber} successfully confirmed!`, 'success');
+      onOrderSuccess(result.order);
     } catch (err: any) {
       setErrorMsg(err.message || 'Network communication error. Please try again.');
       setSubmitting(false);
